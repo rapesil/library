@@ -28,6 +28,9 @@ public class Loan {
     @Column(name = "return_date")
     private LocalDate returnDate;
 
+    @Column(name = "deadline_return")
+    private LocalDate deadLine;
+
     private int copyNumber;
 
 }

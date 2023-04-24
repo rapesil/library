@@ -32,4 +32,8 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<Loan> bookLoans = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserStatus status;
+
 }

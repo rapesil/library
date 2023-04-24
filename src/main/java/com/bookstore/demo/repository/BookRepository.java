@@ -13,7 +13,7 @@ public interface BookRepository extends JpaRepository<Book, Long> {
 
     List<Book> findByStatus(BookStatus status);
 
-    Optional<Book> findByTitleContainingIgnoreCase(String title);
+    Optional<Book> findByTitleIgnoreCase(String title);
 
     Optional<Book> findByIdAndStatus(Long id, BookStatus status);
 

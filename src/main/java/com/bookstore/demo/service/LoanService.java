@@ -3,8 +3,10 @@ package com.bookstore.demo.service;
 import com.bookstore.demo.entities.Book;
 import com.bookstore.demo.entities.BookStatus;
 import com.bookstore.demo.entities.Loan;
+import com.bookstore.demo.entities.UserStatus;
 import com.bookstore.demo.entities.dto.LoanCreated;
 import com.bookstore.demo.entities.dto.LoanDTO;
+import com.bookstore.demo.exceptions.ErrorResponse;
 import com.bookstore.demo.repository.BookRepository;
 import com.bookstore.demo.repository.LoanRepository;
 import com.bookstore.demo.repository.UserRepository;
@@ -32,42 +34,58 @@ public class LoanService {
         return bookRepository.findById(loanDTO.getBookId())
                 .flatMap(book -> userRepository.findById(loanDTO.getUserId())
                         .map(user -> {
-                            if (book.getStatus() == BookStatus.AVAILABLE) {
+                            if (book.getStatus() == BookStatus.AVAILABLE && user.getStatus() == UserStatus.APPROVED) {
                                 book.setStatus(BookStatus.BORROWED);
                                 Loan loan = new Loan();
                                 loan.setBook(book);
                                 loan.setUser(user);
                                 loan.setLoanDate(LocalDate.now());
+                                loan.setDeadLine(LocalDate.now().plusDays(7L));
                                 loanRepository.save(loan);
                                 bookRepository.save(book);
-                                return ResponseEntity.created(URI.create("/books/" + loan.getId())).body(LoanCreated.from(loan));
+                                return ResponseEntity.created(URI.create("/books/" + loan.getId()))
+                                        .body(LoanCreated.from(loan));
                             } else {
-                                return ResponseEntity.status(HttpStatus.CONFLICT).body("Livro não disponível");
+                                return ResponseEntity.status(HttpStatus.CONFLICT)
+                                        .body(new ErrorResponse("Book is not available"));
                             }
                         }))
-                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Livro ou usuário não encontrado"));
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Book or user not found")));
     }
 
-    public ResponseEntity<String> returnBook(Long id) {
+    public ResponseEntity<?> returnBook(Long id) {
         Optional<Loan> loanOptional = loanRepository.findById(id);
 
         if (loanOptional.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Empréstimo não encontrado");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Loan not found"));
         }
 
         Loan loan = loanOptional.get();
         Book book = loan.getBook();
 
         if (book.getStatus() == BookStatus.AVAILABLE) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body("Livro já está disponível");
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse("Book already available"));
         }
 
+        if (LocalDate.now().isAfter(loan.getDeadLine())) {
+            if (book.getStatus() == BookStatus.PAYMENT_OK) {
+                book.setStatus(BookStatus.AVAILABLE);
+                loan.setReturnDate(LocalDate.now());
+                loanRepository.save(loan);
+                bookRepository.save(book);
+
+                return ResponseEntity.ok(new ErrorResponse("Loan successfully closed."));
+            }
+            book.setStatus(BookStatus.WAITING_PAYMENT);
+            bookRepository.save(book);
+            return ResponseEntity.status(HttpStatus.OK).body(new ErrorResponse("Waiting Payment"));
+        }
         book.setStatus(BookStatus.AVAILABLE);
         loan.setReturnDate(LocalDate.now());
         loanRepository.save(loan);
         bookRepository.save(book);
+        return ResponseEntity.ok(new ErrorResponse("Loan successfully closed."));
 
-        return ResponseEntity.ok("Empréstimo encerrado com sucesso");
     }
 }
 
