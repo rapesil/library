@@ -2,7 +2,14 @@
 
 This project is in Progress. Some bugs exist on purpose, but some still need to be discovered.
 
-To run locally:
+## About the project
+
+To run locally you need install:
+
+* Java 17
+
+Then run:
+
  ```
  ./gradlew bootRun
  ```
@@ -14,7 +21,8 @@ The project will run in port 8080.
 * Add unit test;
 * Add integration test;
 * Add payment module;
-* Add integration to AWS S3 to save book cover
+* Add integration to AWS S3 to save book cover;
+* Add MySql Configuration.
 
 ## Ideas?
 
