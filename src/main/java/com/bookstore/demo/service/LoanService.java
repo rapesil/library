@@ -1,12 +1,12 @@
 package com.bookstore.demo.service;
 
 import com.bookstore.demo.entities.Book;
-import com.bookstore.demo.entities.BookStatus;
+import com.bookstore.demo.entities.enums.BookStatus;
 import com.bookstore.demo.entities.Loan;
-import com.bookstore.demo.entities.UserStatus;
+import com.bookstore.demo.entities.enums.UserStatus;
 import com.bookstore.demo.entities.dto.LoanCreated;
 import com.bookstore.demo.entities.dto.LoanDTO;
-import com.bookstore.demo.exceptions.ErrorResponse;
+import com.bookstore.demo.controller.response.ErrorResponse;
 import com.bookstore.demo.repository.BookRepository;
 import com.bookstore.demo.repository.LoanRepository;
 import com.bookstore.demo.repository.UserRepository;

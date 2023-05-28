@@ -1,4 +1,4 @@
-package com.bookstore.demo.entities;
+package com.bookstore.demo.entities.enums;
 
 public enum UserStatus {
     APPROVED,

@@ -1,7 +1,10 @@
 package com.bookstore.demo.controller;
 
+import com.bookstore.demo.controller.response.BookFoundResponse;
+import com.bookstore.demo.controller.response.ErrorResponse;
+import com.bookstore.demo.controller.response.LossResponse;
 import com.bookstore.demo.entities.Book;
-import com.bookstore.demo.entities.BookStatus;
+import com.bookstore.demo.entities.enums.BookStatus;
 import com.bookstore.demo.entities.dto.BookDTO;
 import com.bookstore.demo.exceptions.*;
 import com.bookstore.demo.repository.BookRepository;
@@ -9,7 +12,6 @@ import com.bookstore.demo.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

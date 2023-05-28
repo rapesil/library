@@ -1,6 +1,7 @@
 package com.bookstore.demo.entities;
 
 
+import com.bookstore.demo.entities.enums.UserStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,7 +1,7 @@
 package com.bookstore.demo.service;
 
 import com.bookstore.demo.entities.User;
-import com.bookstore.demo.entities.UserStatus;
+import com.bookstore.demo.entities.enums.UserStatus;
 import com.bookstore.demo.entities.dto.UserDTO;
 import com.bookstore.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

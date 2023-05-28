@@ -1,6 +1,7 @@
 package com.bookstore.demo.entities;
 
 
+import com.bookstore.demo.entities.enums.BookStatus;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.Data;

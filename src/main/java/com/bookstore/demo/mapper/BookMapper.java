@@ -2,7 +2,7 @@ package com.bookstore.demo.mapper;
 
 import com.bookstore.demo.entities.Book;
 import com.bookstore.demo.entities.dto.BookDTO;
-import com.bookstore.demo.entities.BookStatus;
+import com.bookstore.demo.entities.enums.BookStatus;
 
 public class BookMapper {
 

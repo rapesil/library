@@ -1,11 +1,11 @@
 package com.bookstore.demo.service;
 
 import com.bookstore.demo.entities.Book;
-import com.bookstore.demo.entities.BookStatus;
+import com.bookstore.demo.entities.enums.BookStatus;
 import com.bookstore.demo.entities.dto.BookDTO;
-import com.bookstore.demo.exceptions.BookAlreadyRegistered;
 import com.bookstore.demo.exceptions.BookNotFoundException;
-import com.bookstore.demo.exceptions.ErrorResponse;
+import com.bookstore.demo.controller.response.ErrorResponse;
+import com.bookstore.demo.exceptions.BookNotLostException;
 import com.bookstore.demo.exceptions.LossRecordExistsException;
 import com.bookstore.demo.mapper.BookMapper;
 import com.bookstore.demo.repository.BookRepository;
@@ -74,7 +74,7 @@ public class BookService {
                 book.setStatus(BookStatus.WAITING_PAYMENT);
             case AVAILABLE:
             case BORROWED:
-                throw new BookNotFoundException("Book was not lost. Actual status is " + book.getStatus());
+                throw new BookNotLostException("Book was not lost. Actual status is " + book.getStatus());
         }
         return bookRepository.save(book);
     }

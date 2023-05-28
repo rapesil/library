@@ -1,8 +1,8 @@
 package com.bookstore.demo.service;
 
 import com.bookstore.demo.entities.Book;
-import com.bookstore.demo.entities.BookStatus;
 import com.bookstore.demo.entities.dto.BookDTO;
+import com.bookstore.demo.entities.enums.BookStatus;
 import com.bookstore.demo.exceptions.LossRecordExistsException;
 import com.bookstore.demo.repository.BookRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -22,7 +22,11 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class BookServiceTest {
