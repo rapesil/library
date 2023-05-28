@@ -24,7 +24,7 @@ public class BookService {
     private BookRepository bookRepository;
 
     public ResponseEntity<?> createABook(BookDTO bookDTO) {
-        var foundBook = bookRepository.findByTitleIgnoreCase(bookDTO.getTitle());
+        Optional<Book> foundBook = bookRepository.findByTitleIgnoreCase(bookDTO.getTitle());
 
 
         if(foundBook.isPresent()) {

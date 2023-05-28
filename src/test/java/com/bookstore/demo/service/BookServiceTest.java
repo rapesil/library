@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static com.bookstore.demo.mapper.BookMapper.toDTO;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.any;
@@ -45,36 +46,18 @@ public class BookServiceTest {
 
         ResponseEntity<?> response = service.createABook(new BookDTO());
 
-        assertThat(response.getStatusCode())
-                .isEqualTo(HttpStatus.CONFLICT);
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
     }
 
     @Test
     @DisplayName("Deve cadastrar um livro com sucesso")
     void createABook_succesfully() {
-        when(mockRepository.findByTitleIgnoreCase(any()))
-                .thenReturn(Optional.empty());
+        when(mockRepository.findByTitleIgnoreCase("Livro 1")).thenReturn(Optional.empty());
 
-        Book book = new Book();
-        book.setId(1L);
-        book.setTitle("Livro 1");
-        book.setAuthor("Rafael Peixoto");
-        book.setPublisher("Casa do Código");
-        book.setPageCount(300);
-        book.setPublicationYear(2017);
-        book.setSummary("Summary");
-
-        when(mockRepository.save(any()))
-                .thenReturn(new Book());
-
-        BookDTO bookDTO = new BookDTO();
-        bookDTO.setTitle("Livro 1");
-        bookDTO.setAuthor("Rafael Peixoto");
-        bookDTO.setPublisher("Casa do Código");
-        bookDTO.setPageCount(300);
-        bookDTO.setPublicationYear(2017);
-        bookDTO.setSummary("Summary");
-        ResponseEntity<?> response = service.createABook(bookDTO);
+        Book book = getBook();
+        when(mockRepository.save(any())).thenReturn(book);
+        
+        ResponseEntity<?> response = service.createABook(toDTO(book));
 
         assertThat(response.getStatusCode())
                 .isEqualTo(HttpStatus.CREATED);
@@ -141,5 +124,18 @@ public class BookServiceTest {
         book.setStatus(status);
         return book;
     }
+
+    private Book getBook() {
+        Book book = new Book();
+        book.setId(1L);
+        book.setTitle("Livro 1");
+        book.setAuthor("Rafael Peixoto");
+        book.setPublisher("Casa do Código");
+        book.setPageCount(300);
+        book.setPublicationYear(2017);
+        book.setSummary("Summary");
+        return book;
+    }
+    
 
 }
