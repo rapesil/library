@@ -3,25 +3,13 @@ package com.bookstore.demo.entities.dto;
 import com.bookstore.demo.entities.Loan;
 import com.bookstore.demo.mapper.BookMapper;
 import com.bookstore.demo.mapper.UserMapper;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-public class LoanCreated {
-    private Long id;
-    private BookDTO book;
-    private UserDTO user;
-
+public record LoanCreated(Long id, BookDTO book, UserDTO user) {
     public static LoanCreated from(Loan loan) {
-        return LoanCreated.builder()
-                .id(loan.getId())
-                .book(BookMapper.toDTO(loan.getBook()))
-                .user(UserMapper.toDTO(loan.getUser()))
-                .build();
+        return new LoanCreated(
+            loan.getId(),
+            BookMapper.toDTO(loan.getBook()),
+            UserMapper.toDTO(loan.getUser())
+        );
     }
 }

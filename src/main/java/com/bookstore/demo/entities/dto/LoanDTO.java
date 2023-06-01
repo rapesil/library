@@ -1,10 +1,5 @@
 package com.bookstore.demo.entities.dto;
 
-import lombok.Data;
-
-@Data
-public class LoanDTO {
-    private Long bookId;
-    private Long userId;
+public record LoanDTO (Long bookId, Long userId){
 
 }

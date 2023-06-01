@@ -35,9 +35,6 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
-
     @OneToMany(mappedBy = "user")
     private List<Loan> bookLoans = new ArrayList<>();
 

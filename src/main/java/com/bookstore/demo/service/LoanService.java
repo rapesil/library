@@ -31,8 +31,8 @@ public class LoanService {
     }
 
     public ResponseEntity<?> createLoan(LoanDTO loanDTO) {
-        return bookRepository.findById(loanDTO.getBookId())
-                .flatMap(book -> userRepository.findById(loanDTO.getUserId())
+        return bookRepository.findById(loanDTO.bookId())
+                .flatMap(book -> userRepository.findById(loanDTO.userId())
                         .map(user -> {
                             if (book.getStatus() == BookStatus.AVAILABLE && user.getStatus() == UserStatus.APPROVED) {
                                 book.setStatus(BookStatus.BORROWED);

@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,8 +48,8 @@ public class BookController {
 
     @GetMapping("/{name}")
     public ResponseEntity<?> getBookByName(@PathVariable String name) {
-
-        Optional<Book> book = service.findBookByName(name);
+        String decodedName = URLDecoder.decode(name, StandardCharsets.UTF_8);
+        Optional<Book> book = service.findBookByName(decodedName);
         if (book.isPresent()) {
             return ResponseEntity.ok(book.get());
         }

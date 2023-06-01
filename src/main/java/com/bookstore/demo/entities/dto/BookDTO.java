@@ -1,14 +1,13 @@
 package com.bookstore.demo.entities.dto;
 
-import lombok.Data;
+public record BookDTO(String title,
+                      String author,
+                      String publisher,
+                      Integer pageCount,
+                      Integer publicationYear,
+                      String summary) {
 
-@Data
-public class BookDTO {
-    private String title;
-    private String author;
-    private String publisher;
-    private Integer pageCount;
-    private Integer publicationYear;
-    private String summary;
-
+  public BookDTO() {
+    this(null, null, null, 0, 0, null);
+  }
 }
