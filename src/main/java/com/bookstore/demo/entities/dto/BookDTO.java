@@ -1,5 +1,7 @@
 package com.bookstore.demo.entities.dto;
 
+
+@SuppressWarnings("all")
 public record BookDTO(String title,
                       String author,
                       String publisher,

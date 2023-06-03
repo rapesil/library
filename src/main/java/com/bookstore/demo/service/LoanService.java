@@ -4,7 +4,7 @@ import com.bookstore.demo.entities.Book;
 import com.bookstore.demo.entities.enums.BookStatus;
 import com.bookstore.demo.entities.Loan;
 import com.bookstore.demo.entities.enums.UserStatus;
-import com.bookstore.demo.entities.dto.LoanCreated;
+import com.bookstore.demo.entities.dto.LoanCreatedDTO;
 import com.bookstore.demo.entities.dto.LoanDTO;
 import com.bookstore.demo.controller.response.ErrorResponse;
 import com.bookstore.demo.repository.BookRepository;
@@ -44,7 +44,7 @@ public class LoanService {
                                 loanRepository.save(loan);
                                 bookRepository.save(book);
                                 return ResponseEntity.created(URI.create("/books/" + loan.getId()))
-                                        .body(LoanCreated.from(loan));
+                                        .body(LoanCreatedDTO.from(loan));
                             } else {
                                 return ResponseEntity.status(HttpStatus.CONFLICT)
                                         .body(new ErrorResponse("Book is not available"));
