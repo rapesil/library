@@ -69,6 +69,17 @@ public class BookServiceTest {
                 .isEqualTo(HttpStatus.CREATED);
     }
 
+    @Test
+    @DisplayName("Deve localizar um livro com sucesso")
+    void findBookByName_whenBookExist_returnOKResponse(){
+        Mockito.when(mockRepository.findByTitleIgnoreCase("Livro de Teste"))
+            .thenReturn(Optional.of(new Book()));
 
+        ResponseEntity<?> response = service.findBookByName("Livro de Teste");
+
+        Assertions.assertThat(response.getStatusCode())
+            .isEqualTo(HttpStatus.OK);
+
+    }
 
 }
