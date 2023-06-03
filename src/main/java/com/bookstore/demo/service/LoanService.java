@@ -1,12 +1,12 @@
 package com.bookstore.demo.service;
 
 import com.bookstore.demo.entities.Book;
-import com.bookstore.demo.entities.BookStatus;
+import com.bookstore.demo.entities.enums.BookStatus;
 import com.bookstore.demo.entities.Loan;
-import com.bookstore.demo.entities.UserStatus;
-import com.bookstore.demo.entities.dto.LoanCreated;
+import com.bookstore.demo.entities.enums.UserStatus;
+import com.bookstore.demo.entities.dto.LoanCreatedDTO;
 import com.bookstore.demo.entities.dto.LoanDTO;
-import com.bookstore.demo.exceptions.ErrorResponse;
+import com.bookstore.demo.controller.response.ErrorResponse;
 import com.bookstore.demo.repository.BookRepository;
 import com.bookstore.demo.repository.LoanRepository;
 import com.bookstore.demo.repository.UserRepository;
@@ -31,8 +31,8 @@ public class LoanService {
     }
 
     public ResponseEntity<?> createLoan(LoanDTO loanDTO) {
-        return bookRepository.findById(loanDTO.getBookId())
-                .flatMap(book -> userRepository.findById(loanDTO.getUserId())
+        return bookRepository.findById(loanDTO.bookId())
+                .flatMap(book -> userRepository.findById(loanDTO.userId())
                         .map(user -> {
                             if (book.getStatus() == BookStatus.AVAILABLE && user.getStatus() == UserStatus.APPROVED) {
                                 book.setStatus(BookStatus.BORROWED);
@@ -44,7 +44,7 @@ public class LoanService {
                                 loanRepository.save(loan);
                                 bookRepository.save(book);
                                 return ResponseEntity.created(URI.create("/books/" + loan.getId()))
-                                        .body(LoanCreated.from(loan));
+                                        .body(LoanCreatedDTO.from(loan));
                             } else {
                                 return ResponseEntity.status(HttpStatus.CONFLICT)
                                         .body(new ErrorResponse("Book is not available"));

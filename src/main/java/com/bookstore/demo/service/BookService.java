@@ -1,10 +1,12 @@
 package com.bookstore.demo.service;
 
 import com.bookstore.demo.entities.Book;
-import com.bookstore.demo.entities.BookStatus;
+import com.bookstore.demo.entities.enums.BookStatus;
 import com.bookstore.demo.entities.dto.BookDTO;
-import com.bookstore.demo.exceptions.BookAlreadyRegistered;
-import com.bookstore.demo.exceptions.ErrorResponse;
+import com.bookstore.demo.exceptions.BookNotFoundException;
+import com.bookstore.demo.controller.response.ErrorResponse;
+import com.bookstore.demo.exceptions.BookNotLostException;
+import com.bookstore.demo.exceptions.LossRecordExistsException;
 import com.bookstore.demo.mapper.BookMapper;
 import com.bookstore.demo.repository.BookRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +24,7 @@ public class BookService {
     private BookRepository bookRepository;
 
     public ResponseEntity<?> createABook(BookDTO bookDTO) {
-        var foundBook = bookRepository.findByTitleIgnoreCase(bookDTO.getTitle());
+        Optional<Book> foundBook = bookRepository.findByTitleIgnoreCase(bookDTO.title());
 
 
         if(foundBook.isPresent()) {
@@ -37,49 +39,43 @@ public class BookService {
         return ResponseEntity.created(URI.create("/books/" + savedBook.getId())).body(savedBookDTO);
     }
 
-    public ResponseEntity<?> findBookByName(String name) {
-        var book = bookRepository.findByTitleIgnoreCase(name);
-        if (book.isPresent()) {
-            return ResponseEntity.ok(book.get());
-        }
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Book Not Found"));
+    public Optional<Book> findBookByName(String name) {
+        return bookRepository.findByTitleIgnoreCase(name);
     }
 
-    public ResponseEntity<?> registerLost(Long id) {
-        Optional<Book> book = bookRepository.findById(id);
-        if (book.isPresent()) {
-            if(book.get().getStatus() == BookStatus.BORROWED) {
-                book.get().setStatus(BookStatus.LOST_BY_CUSTOMER);
-                bookRepository.save(book.get());
-                return ResponseEntity.status(HttpStatus.OK)
-                        .body(new ErrorResponse("The value for the loss is R$100.00. Please, regularize your situation."));
-            }
-            book.get().setStatus(BookStatus.INTERNAL_LOST);
-            bookRepository.save(book.get());
-            return ResponseEntity.status(HttpStatus.OK).body(new ErrorResponse("Loss record saved successfully"));
+    public Book registerLost(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException("Book Not Found"));
+
+        BookStatus currentStatus = book.getStatus();
+        switch (currentStatus) {
+            case AVAILABLE:
+                book.setStatus(BookStatus.INTERNAL_LOST);
+                break;
+            case BORROWED:
+                book.setStatus(BookStatus.LOST_BY_CUSTOMER);
+                break;
+            case LOST_BY_CUSTOMER:
+            case INTERNAL_LOST:
+                throw new LossRecordExistsException("Loss record already saved");
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Book Not Found"));
+        return bookRepository.save(book);
     }
 
-    public ResponseEntity<?> registerFound(Long id) {
-        Optional<Book> book = bookRepository.findById(id);
-        if (book.isPresent()) {
-            if(book.get().getStatus() == BookStatus.INTERNAL_LOST) {
-                book.get().setStatus(BookStatus.AVAILABLE);
-                bookRepository.save(book.get());
-                return ResponseEntity.status(HttpStatus.OK).body(new ErrorResponse("Book is now available"));
-            }
+    public Book registerFound(Long id) {
+        Book book = bookRepository.findById(id)
+                .orElseThrow(() -> new BookNotFoundException("Book Not Found"));
 
-            if(book.get().getStatus() == BookStatus.LOST_BY_CUSTOMER) {
-                book.get().setStatus(BookStatus.WAITING_PAYMENT);
-                bookRepository.save(book.get());
-                return ResponseEntity.status(HttpStatus.OK).body(new ErrorResponse("Waiting Payment"));
-            }
-
-            return ResponseEntity.status(HttpStatus.CONFLICT)
-                    .body(new ErrorResponse("Book was not lost. Actual status is " + book.get().getStatus()));
+        BookStatus currentStatus = book.getStatus();
+        switch (currentStatus) {
+            case INTERNAL_LOST:
+                book.setStatus(BookStatus.AVAILABLE);
+            case LOST_BY_CUSTOMER:
+                book.setStatus(BookStatus.WAITING_PAYMENT);
+            case AVAILABLE:
+            case BORROWED:
+                throw new BookNotLostException("Book was not lost. Actual status is " + book.getStatus());
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Book Not Found"));
+        return bookRepository.save(book);
     }
 }
