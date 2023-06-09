@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URLDecoder;
@@ -42,8 +43,12 @@ public class BookController {
     }
 
     @GetMapping
-    public List<Book> getAllBooks() {
-        return bookRepository.findAll();
+    public List<Book> getAllBooks(@RequestParam(value = "title", required = false) String title,
+                                  @RequestParam(value = "author", required = false) String author,
+                                  @RequestParam(value = "publisher", required = false) String publisher,
+                                  @RequestParam(value = "publicationYear", required = false) Integer publicationYear) {
+
+        return service.searchBooks(title, author, publisher, publicationYear);
     }
 
     @GetMapping("/{name}")

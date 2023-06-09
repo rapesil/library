@@ -15,7 +15,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class BookService {
@@ -37,6 +40,38 @@ public class BookService {
         BookDTO savedBookDTO = BookMapper.toDTO(savedBook);
 
         return ResponseEntity.created(URI.create("/books/" + savedBook.getId())).body(savedBookDTO);
+    }
+
+    public List<Book> searchBooks(String title, String author, String publisher, Integer year) {
+            List<Book> allBooks = bookRepository.findAll();
+            List<Book> filteredBooks = new ArrayList<>();
+
+            for (Book book : allBooks) {
+                boolean match = true;
+
+                if (title != null && !book.getTitle().equalsIgnoreCase(title)) {
+                    match = false;
+                }
+
+
+                if (author != null && !book.getAuthor().equalsIgnoreCase(author)) {
+                    match = false;
+                }
+
+                if (publisher != null && !book.getPublisher().equalsIgnoreCase(publisher)) {
+                    match = false;
+                }
+
+                if (year != null && !book.getPublicationYear().equals(year)) {
+                    match = false;
+                }
+
+                if (match) {
+                    filteredBooks.add(book);
+                }
+            }
+
+            return filteredBooks;
     }
 
     public Optional<Book> findBookByName(String name) {
