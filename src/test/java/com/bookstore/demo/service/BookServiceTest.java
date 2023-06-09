@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -104,6 +105,29 @@ public class BookServiceTest {
                         .hasMessage("Loss record already saved");
         verify(mockRepository, never()).save(book);
     }
+
+    @Test
+    @DisplayName("Deve retornar todos os livros da base, pois não estamos usando filtro")
+    void searchBook_shouldReturnAllBooks() {
+        Book book = new Book();
+        book.setTitle("Livro 1");
+
+        Book book2 = new Book();
+        book.setTitle("Livro 2");
+
+        Book book3 = new Book();
+        book.setTitle("Livro 3");
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2, book3));
+
+        List<Book> books = service.searchBooks(null, null, null, null);
+
+//        assertThat(books.size()).isEqualTo(3);
+        assertThat(books)
+            .hasSize(3)
+            .containsExactlyInAnyOrderElementsOf(List.of(book, book2, book3));
+    }
+
 
     private static Stream<Arguments> provideStatuses() {
         return Stream.of(

@@ -53,7 +53,6 @@ public class BookService {
                     match = false;
                 }
 
-
                 if (author != null && !book.getAuthor().equalsIgnoreCase(author)) {
                     match = false;
                 }
