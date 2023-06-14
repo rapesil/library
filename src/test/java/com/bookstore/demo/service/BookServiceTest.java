@@ -128,6 +128,112 @@ public class BookServiceTest {
             .containsExactlyInAnyOrderElementsOf(List.of(book, book2, book3));
     }
 
+    @Test
+    @DisplayName("Deve retornar o livro através do título")
+    void searchBook_searchingByTitle() {
+        Book book = new Book();
+        book.setTitle("Livro 1");
+
+        when(mockRepository.findAll()).thenReturn(List.of(book));
+
+        List<Book> books = service.searchBooks("Livro 1", null, null, null);
+
+        assertThat(books)
+                .hasSize(1)
+                .contains(book);
+    }
+
+    @Test
+    @DisplayName("Deve retornar os livros através do autor")
+    void searchBook_searchingByAuthor() {
+        Book book = new Book();
+        book.setAuthor("Gustavo Silva");
+
+        Book book2 = new Book();
+        book2.setAuthor("Gustavo Silva");
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2));
+
+        List<Book> books = service.searchBooks(null, "Gustavo Silva", null, null);
+
+        assertThat(books)
+                .hasSize(2)
+                .containsExactlyInAnyOrderElementsOf(List.of(book, book2));
+    }
+
+    @Test
+    @DisplayName("Deve retornar os livros através da editora ")
+    void searchBook_searchingByPublisher () {
+        Book book = new Book();
+        book.setPublisher("Casa do Código");
+
+        Book book2 = new Book();
+        book2.setPublisher("Casa do Código");
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2));
+
+        List<Book> books = service.searchBooks(null, null, "Casa do Código", null);
+
+        assertThat(books)
+                .hasSize(2)
+                .containsExactlyInAnyOrderElementsOf(List.of(book, book2));
+    }
+
+    @Test
+    @DisplayName("Deve retornar os livros através do ano")
+    void searchBook_searchingByYear () {
+        Book book = new Book();
+        book.setPublicationYear(2017);
+
+        Book book2 = new Book();
+        book2.setPublicationYear(2017);
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2));
+
+        List<Book> books = service.searchBooks(null, null, null, 2017);
+
+        assertThat(books)
+                .hasSize(2)
+                .containsExactlyInAnyOrderElementsOf(List.of(book, book2));
+    }
+
+    @Test
+    @DisplayName("Deve retornar os livros através do autor e da editora")
+    void searchBook_searchingByAuthorAndPublisher () {
+        Book book = new Book();
+        book.setAuthor("Rafael Peixoto");
+        book.setPublisher("Casa do Código");
+
+        Book book2 = new Book();
+        book2.setAuthor("Rafael Peixoto");
+        book2.setPublisher("Casa do Código");
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2));
+
+        List<Book> books = service.searchBooks(null, "Rafael Peixoto", "Casa do Código", null);
+
+        assertThat(books)
+                .hasSize(2)
+                .containsExactlyInAnyOrderElementsOf(List.of(book, book2));
+    }
+
+    @Test
+    @DisplayName("Deve retornar os livros através do título, autor, editora e ano")
+    void searchBook_searchingWithAllFilters () {
+        Book book = new Book();
+        book.setTitle("Livro 1");
+        book.setAuthor("Rafael Peixoto");
+        book.setPublisher("Casa do Código");
+        book.setPublicationYear(2017);
+
+        when(mockRepository.findAll()).thenReturn(List.of(book));
+
+        List<Book> books = service.searchBooks("Livro 1", "Rafael Peixoto", "Casa do Código", 2017);
+
+        assertThat(books)
+                .hasSize(1)
+                .contains(book);
+    }
 
     private static Stream<Arguments> provideStatuses() {
         return Stream.of(
@@ -160,6 +266,4 @@ public class BookServiceTest {
         book.setSummary("Summary");
         return book;
     }
-    
-
 }
