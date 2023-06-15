@@ -3,6 +3,7 @@ package com.bookstore.demo.service;
 import com.bookstore.demo.entities.Book;
 import com.bookstore.demo.entities.dto.BookDTO;
 import com.bookstore.demo.entities.enums.BookStatus;
+import com.bookstore.demo.exceptions.BookNotLostException;
 import com.bookstore.demo.exceptions.LossRecordExistsException;
 import com.bookstore.demo.repository.BookRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -235,10 +236,59 @@ public class BookServiceTest {
                 .contains(book);
     }
 
+    @Test
+    @DisplayName("Deve registrar que um livro foi encontrado internamente com sucesso e adicionar como disponível")
+    void registerFound_internally_successfully() {
+        Book book = getBookWithStatus(BookStatus.INTERNAL_LOST);
+
+        when(mockRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(mockRepository.save(any(Book.class))).thenReturn(book);
+
+        Book bookRegisteredAsFound = service.registerFound(1L);
+
+        assertThat(bookRegisteredAsFound.getStatus()).isEqualTo(BookStatus.AVAILABLE);
+        verify(mockRepository, times(1)).save(book);
+    }
+
+    @Test
+    @DisplayName("Deve registrar que um livro foi encontrado pelo cliente com sucesso e adicionar pendência de pagamento")
+    void registerFound_byCustomer_successfully() {
+        Book book = getBookWithStatus(BookStatus.LOST_BY_CUSTOMER);
+
+        when(mockRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(mockRepository.save(any(Book.class))).thenReturn(book);
+
+        Book bookRegisteredAsFound = service.registerFound(1L);
+
+        assertThat(bookRegisteredAsFound.getStatus()).isEqualTo(BookStatus.WAITING_PAYMENT);
+        verify(mockRepository, times(1)).save(book);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideStatusesRegisterFound")
+    @DisplayName("Deve informar que o livro mencionado não foi perdido e apontar o estado real do mesmo")
+    void registerFound_whenBookWasNotLost_shouldReturnError(BookStatus status) {
+        Book book = getBookWithStatus(status);
+
+        when (mockRepository.findById(1L)).thenReturn(Optional.of(book));
+
+        assertThatThrownBy(() -> service.registerFound(1L))
+                .isInstanceOf(BookNotLostException.class)
+                .hasMessage("Book was not lost. Actual status is " + status);
+        verify(mockRepository, never()).save(book);
+    }
+
     private static Stream<Arguments> provideStatuses() {
         return Stream.of(
                 Arguments.of(BookStatus.LOST_BY_CUSTOMER),
                 Arguments.of(BookStatus.INTERNAL_LOST)
+        );
+    }
+
+    private static Stream<Arguments> provideStatusesRegisterFound() {
+        return Stream.of(
+                Arguments.of(BookStatus.AVAILABLE),
+                Arguments.of(BookStatus.BORROWED)
         );
     }
 
