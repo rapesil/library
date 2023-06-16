@@ -225,7 +225,11 @@ public class BookServiceTest {
         book3.setAuthor("Gustavo Silva");
         book3.setPublisher("Companhia das Letras");
 
-        when(mockRepository.findAll()).thenReturn(List.of(book, book2, book3));
+        Book book4 = new Book();
+        book4.setAuthor("Gustavo Silva");
+        book4.setPublisher("Casa do Código");
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2, book3, book4));
 
         List<Book> books = service.searchBooks(null, "Rafael Peixoto", "Casa do Código", null);
 
@@ -249,7 +253,13 @@ public class BookServiceTest {
         book2.setPublisher("Companhia das Letras");
         book2.setPublicationYear(2023);
 
-        when(mockRepository.findAll()).thenReturn(List.of(book, book2));
+        Book book3 = new Book();
+        book3.setTitle("Livro 1");
+        book3.setAuthor("Rafael Peixoto");
+        book3.setPublisher("Casa do Código");
+        book3.setPublicationYear(2023);
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2, book3));
 
         List<Book> books = service.searchBooks("Livro 1", "Rafael Peixoto", "Casa do Código", 2017);
 
