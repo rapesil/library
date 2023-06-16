@@ -104,8 +104,10 @@ public class BookService {
         switch (currentStatus) {
             case INTERNAL_LOST:
                 book.setStatus(BookStatus.AVAILABLE);
+                break;
             case LOST_BY_CUSTOMER:
                 book.setStatus(BookStatus.WAITING_PAYMENT);
+                break;
             case AVAILABLE:
             case BORROWED:
                 throw new BookNotLostException("Book was not lost. Actual status is " + book.getStatus());

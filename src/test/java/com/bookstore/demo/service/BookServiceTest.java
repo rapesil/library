@@ -3,6 +3,7 @@ package com.bookstore.demo.service;
 import com.bookstore.demo.entities.Book;
 import com.bookstore.demo.entities.dto.BookDTO;
 import com.bookstore.demo.entities.enums.BookStatus;
+import com.bookstore.demo.exceptions.BookNotLostException;
 import com.bookstore.demo.exceptions.LossRecordExistsException;
 import com.bookstore.demo.repository.BookRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -128,11 +129,198 @@ public class BookServiceTest {
             .containsExactlyInAnyOrderElementsOf(List.of(book, book2, book3));
     }
 
+    @Test
+    @DisplayName("Deve retornar o livro através do título")
+    void searchBook_searchingByTitle() {
+        Book book = new Book();
+        book.setTitle("Livro 1");
+
+        Book book2 = new Book();
+        book2.setTitle("Livro 2");
+
+        when(mockRepository.findAll()).thenReturn(List.of(book,book2));
+
+        List<Book> books = service.searchBooks("Livro 1", null, null, null);
+
+        assertThat(books)
+                .hasSize(1)
+                .contains(book);
+    }
+
+    @Test
+    @DisplayName("Deve retornar os livros através do autor")
+    void searchBook_searchingByAuthor() {
+        Book book = new Book();
+        book.setAuthor("Gustavo Silva");
+
+        Book book2 = new Book();
+        book2.setAuthor("Gustavo Silva");
+
+        Book book3 = new Book();
+        book3.setAuthor("Rafael Peixoto");
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2, book3));
+
+        List<Book> books = service.searchBooks(null, "Gustavo Silva", null, null);
+
+        assertThat(books)
+                .hasSize(2)
+                .containsExactlyInAnyOrderElementsOf(List.of(book, book2));
+    }
+
+    @Test
+    @DisplayName("Deve retornar os livros através da editora ")
+    void searchBook_searchingByPublisher () {
+        Book book = new Book();
+        book.setPublisher("Casa do Código");
+
+        Book book2 = new Book();
+        book2.setPublisher("Casa do Código");
+
+        Book book3 = new Book();
+        book3.setPublisher("Companhia das Letras");
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2, book3));
+
+        List<Book> books = service.searchBooks(null, null, "Casa do Código", null);
+
+        assertThat(books)
+                .hasSize(2)
+                .containsExactlyInAnyOrderElementsOf(List.of(book, book2));
+    }
+
+    @Test
+    @DisplayName("Deve retornar os livros através do ano")
+    void searchBook_searchingByYear () {
+        Book book = new Book();
+        book.setPublicationYear(2017);
+
+        Book book2 = new Book();
+        book2.setPublicationYear(2017);
+
+        Book book3 = new Book();
+        book3.setPublicationYear(2023);
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2, book3));
+
+        List<Book> books = service.searchBooks(null, null, null, 2017);
+
+        assertThat(books)
+                .hasSize(2)
+                .containsExactlyInAnyOrderElementsOf(List.of(book, book2));
+    }
+
+    @Test
+    @DisplayName("Deve retornar os livros através do autor e da editora")
+    void searchBook_searchingByAuthorAndPublisher () {
+        Book book = new Book();
+        book.setAuthor("Rafael Peixoto");
+        book.setPublisher("Casa do Código");
+
+        Book book2 = new Book();
+        book2.setAuthor("Rafael Peixoto");
+        book2.setPublisher("Casa do Código");
+
+        Book book3 = new Book();
+        book3.setAuthor("Gustavo Silva");
+        book3.setPublisher("Companhia das Letras");
+
+        Book book4 = new Book();
+        book4.setAuthor("Gustavo Silva");
+        book4.setPublisher("Casa do Código");
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2, book3, book4));
+
+        List<Book> books = service.searchBooks(null, "Rafael Peixoto", "Casa do Código", null);
+
+        assertThat(books)
+                .hasSize(2)
+                .containsExactlyInAnyOrderElementsOf(List.of(book, book2));
+    }
+
+    @Test
+    @DisplayName("Deve retornar os livros através do título, autor, editora e ano")
+    void searchBook_searchingWithAllFilters () {
+        Book book = new Book();
+        book.setTitle("Livro 1");
+        book.setAuthor("Rafael Peixoto");
+        book.setPublisher("Casa do Código");
+        book.setPublicationYear(2017);
+
+        Book book2 = new Book();
+        book2.setTitle("Livro 2");
+        book2.setAuthor("Gustavo Silva");
+        book2.setPublisher("Companhia das Letras");
+        book2.setPublicationYear(2023);
+
+        Book book3 = new Book();
+        book3.setTitle("Livro 1");
+        book3.setAuthor("Rafael Peixoto");
+        book3.setPublisher("Casa do Código");
+        book3.setPublicationYear(2023);
+
+        when(mockRepository.findAll()).thenReturn(List.of(book, book2, book3));
+
+        List<Book> books = service.searchBooks("Livro 1", "Rafael Peixoto", "Casa do Código", 2017);
+
+        assertThat(books)
+                .hasSize(1)
+                .contains(book);
+    }
+
+    @Test
+    @DisplayName("Deve registrar que um livro foi encontrado internamente com sucesso e adicionar como disponível")
+    void registerFound_internally_successfully() {
+        Book book = getBookWithStatus(BookStatus.INTERNAL_LOST);
+
+        when(mockRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(mockRepository.save(any(Book.class))).thenReturn(book);
+
+        Book bookRegisteredAsFound = service.registerFound(1L);
+
+        assertThat(bookRegisteredAsFound.getStatus()).isEqualTo(BookStatus.AVAILABLE);
+        verify(mockRepository, times(1)).save(book);
+    }
+
+    @Test
+    @DisplayName("Deve registrar que um livro foi encontrado pelo cliente com sucesso e adicionar pendência de pagamento")
+    void registerFound_byCustomer_successfully() {
+        Book book = getBookWithStatus(BookStatus.LOST_BY_CUSTOMER);
+
+        when(mockRepository.findById(1L)).thenReturn(Optional.of(book));
+        when(mockRepository.save(any(Book.class))).thenReturn(book);
+
+        Book bookRegisteredAsFound = service.registerFound(1L);
+
+        assertThat(bookRegisteredAsFound.getStatus()).isEqualTo(BookStatus.WAITING_PAYMENT);
+        verify(mockRepository, times(1)).save(book);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideStatusesRegisterFound")
+    @DisplayName("Deve informar que o livro mencionado não foi perdido e apontar o estado real do mesmo")
+    void registerFound_whenBookWasNotLost_shouldReturnError(BookStatus status) {
+        Book book = getBookWithStatus(status);
+
+        when (mockRepository.findById(1L)).thenReturn(Optional.of(book));
+
+        assertThatThrownBy(() -> service.registerFound(1L))
+                .isInstanceOf(BookNotLostException.class)
+                .hasMessage("Book was not lost. Actual status is " + status);
+        verify(mockRepository, never()).save(book);
+    }
 
     private static Stream<Arguments> provideStatuses() {
         return Stream.of(
                 Arguments.of(BookStatus.LOST_BY_CUSTOMER),
                 Arguments.of(BookStatus.INTERNAL_LOST)
+        );
+    }
+
+    private static Stream<Arguments> provideStatusesRegisterFound() {
+        return Stream.of(
+                Arguments.of(BookStatus.AVAILABLE),
+                Arguments.of(BookStatus.BORROWED)
         );
     }
 
@@ -160,6 +348,4 @@ public class BookServiceTest {
         book.setSummary("Summary");
         return book;
     }
-    
-
 }
