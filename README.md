@@ -27,5 +27,3 @@ The project will run in port 8080.
 ## Ideas?
 
 Please, share with me opening a new Issue.
-
-Isso é um teste
